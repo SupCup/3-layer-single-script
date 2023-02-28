@@ -1,6 +1,6 @@
 import sqlite3
 import os
-
+import pytest
 
 class Singleton:
     count = 0
@@ -66,22 +66,27 @@ def db_fresh_start():
 ################################
 # ***** TESTS *****
 ################################
+
+
 def test_is_singleton():
     delete_database()
     a = Singleton()
     b = Singleton()
     assert id(a) == id(b)
     
+
 def test_not_initialized():
     delete_database()
     db = Singleton()
     assert [] == db.sql("SELECT * FROM FISH;")
+
 
 def test_database_connect():
     db_fresh_start()
     db = Singleton()
     db.get_cursor()
     assert 2 == len(db.sql("SELECT * FROM fish;"))
+
 
 def test_resetting_after_db_creation():
     delete_database()
@@ -113,3 +118,10 @@ if __name__=="__main__":
         rows = db.sql(stmt)
         for row in rows:
             print(row)
+            
+@pytest.fixture
+def data():
+    create = "CREATE TABLE fish (name TEXT, species TEXT, tank_number INTEGER)"
+    insert1 = "INSERT INTO fish VALUES ('Sammy', 'shark', 1)"
+    insert2 = "INSERT INTO fish VALUES ('Jamie', 'cuttlefish', 7)"
+    return {"create": create, "insert1": insert1, "insert2": insert2}
